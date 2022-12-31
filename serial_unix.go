@@ -4,6 +4,7 @@
 // license that can be found in the LICENSE file.
 //
 
+//go:build linux || darwin || freebsd || openbsd
 // +build linux darwin freebsd openbsd
 
 package serial
@@ -224,8 +225,10 @@ func nativeOpen(portName string, mode *Mode) (*unixPort, error) {
 	// Set raw mode
 	setRawMode(settings)
 
-	// Explicitly disable RTS/CTS flow control
-	setTermSettingsCtsRts(false, settings)
+	// UPSTREAM: Explicitly disable RTS/CTS flow control
+	// but we need this for more than 4096 byte data
+	// becasue linux tty default buffer size is 4096
+	setTermSettingsCtsRts(true, settings)
 
 	if port.setTermSettings(settings) != nil {
 		port.Close()
